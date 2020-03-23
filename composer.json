@@ -1,5 +1,5 @@
 {
-  "name": "linlancer/rabbitMQ-queue",
+  "name": "linlancer/rabbit-mq-queue",
   "description": "Base on  Vladimir Yuldashev <misterio92@gmail.com> laravel-queue-rabbitmq",
   "license": "MIT",
   "authors": [
