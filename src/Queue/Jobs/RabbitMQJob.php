@@ -52,7 +52,6 @@ class RabbitMQJob extends Job implements JobContract
     {
         try {
             $payload = $this->payload();
-
             [$class, $method] = JobName::parse($payload['job']);
 
             with($this->instance = $this->resolve($class))->{$method}($this, $payload['data']);
@@ -78,9 +77,9 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function getName()
     {
-        $defaultJob = $this->queue->getOption('default_job');
-        $jobMapping = $this->queue->getOption('job_mapping');
-        $action = $this->payload()['action'];
+        $defaultJob = $this->connection->getOption('default_job');
+        $jobMapping = $this->connection->getOption('job_mapping');
+        $action = $this->payload()['action'] ?? '';
         return isset($jobMapping[$action]) ? $jobMapping[$action] : $defaultJob;
     }
     /**
@@ -129,7 +128,6 @@ class RabbitMQJob extends Job implements JobContract
         $this->delete();
 
         $body = $this->payload();
-
         /*
          * Some jobs don't have the command set, so fall back to just sending it the job name string
          */
@@ -140,7 +138,6 @@ class RabbitMQJob extends Job implements JobContract
         }
 
         $data = $body['data'];
-
         $this->connection->release($delay, $job, $data, $this->getQueue(), $this->attempts() + 1);
     }
 
@@ -152,7 +149,7 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function getJobId(): string
     {
-        return $this->message->getCorrelationId();
+        return $this->message->getCorrelationId() ?? '';
     }
 
     /**
@@ -166,7 +163,21 @@ class RabbitMQJob extends Job implements JobContract
     {
         $this->connection->setCorrelationId($id);
     }
-
+    public function payload()
+    {
+        $payload = json_decode($this->getRawBody(), true);
+        !isset($payload['data']) && $payload['data'] = $payload['queue'] ?? [];
+        !isset($payload['job']) && $payload['job'] = $this->getName();
+        return $payload;
+    }
+    /**
+     * 更新payload
+     * @param array $data
+     */
+    private function setPayload(array $data)
+    {
+        $this->message->setBody(json_encode($data));
+    }
     /**
      * Unserialize job.
      *
