@@ -174,7 +174,7 @@ class RabbitMQJob extends Job implements JobContract
             $jobMapping = $this->connection->getOption('job_mapping');
             $action = $payload['action'] ?? '';
             $job = $jobMapping[$action] ?? $defaultJob;
-            $payload['job'] = $job;
+            $payload['job'] = $job.'@handle';
             $this->setPayload($payload);
         }
         return $payload;
