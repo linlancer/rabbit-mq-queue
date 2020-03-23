@@ -1,11 +1,11 @@
 {
-  "name": "linlancer/laravel-queue-rabbitmq",
-  "description": "RabbitMQ driver for Laravel Queue. Supports Laravel Horizon",
+  "name": "linlancer/rabbitMQ-queue",
+  "description": "Base on  Vladimir Yuldashev <misterio92@gmail.com> laravel-queue-rabbitmq",
   "license": "MIT",
   "authors": [
     {
-      "name": "Vladimir Yuldashev",
-      "email": "misterio92@gmail.com"
+      "name": "linlancer",
+      "email": "89662208@qq.com"
     }
   ],
   "require": {
