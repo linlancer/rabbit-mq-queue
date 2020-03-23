@@ -77,10 +77,7 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function getName()
     {
-        $defaultJob = $this->connection->getOption('default_job');
-        $jobMapping = $this->connection->getOption('job_mapping');
-        $action = $this->payload()['action'] ?? '';
-        return isset($jobMapping[$action]) ? $jobMapping[$action] : $defaultJob;
+        return $this->payload()['job'] ?? '';
     }
     /**
      * Get the number of times the job has been attempted.
@@ -163,11 +160,23 @@ class RabbitMQJob extends Job implements JobContract
     {
         $this->connection->setCorrelationId($id);
     }
+
+    /**
+     * 获取payload
+     * @return array|mixed
+     */
     public function payload()
     {
         $payload = json_decode($this->getRawBody(), true);
         !isset($payload['data']) && $payload['data'] = $payload['queue'] ?? [];
-        !isset($payload['job']) && $payload['job'] = $this->getName();
+        if (!isset($payload['job'])) {
+            $defaultJob = $this->connection->getOption('default_job');
+            $jobMapping = $this->connection->getOption('job_mapping');
+            $action = $payload['action'] ?? '';
+            $job = $jobMapping[$action] ?? $defaultJob;
+            $payload['job'] = $job;
+            $this->setPayload($payload);
+        }
         return $payload;
     }
     /**
