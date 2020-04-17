@@ -1,4 +1,5 @@
-RabbitMQ Queue driver for Laravel
+# RabbitMQ Queue driver for Laravel
+## Base on vladimir-yuldashev/laravel-queue-rabbitmq 
 ======================
 [![Latest Stable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/stable?format=flat-square)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
 [![Build Status](https://img.shields.io/travis/vyuldashev/laravel-queue-rabbitmq.svg?style=flat-square)](https://travis-ci.org/vyuldashev/laravel-queue-rabbitmq)
@@ -6,12 +7,19 @@ RabbitMQ Queue driver for Laravel
 [![StyleCI](https://styleci.io/repos/14976752/shield)](https://styleci.io/repos/14976752)
 [![License](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/license?format=flat-square)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
 
+## Introduction
+原作者的方案在分布式MQ队列部署中，队列任务的格式跟laravel框架中的格式大不一样，导致无法使用原方案
+
+由于当前rabbitMQ是基于Java生产者的分布部署模式，PHP主要作为消费者的一个队列消费模式 
+主要修改了 消费类 及 配置增加默认队列 及 队列映射的配置  
+其他无改动  基于原8.0.0改造
+
 ## Installation
 
 You can install this package via composer using this command:
 
 ```
-composer require vladimir-yuldashev/laravel-queue-rabbitmq
+composer require linlancer/rabbit-mq-queue
 ```
 
 The package will automatically register itself using Laravel auto-discovery.
@@ -96,6 +104,11 @@ Setup connection in `config/queue.php`
                 'exclusive' => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
                 'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
                 'arguments' => env('RABBITMQ_QUEUE_ARGUMENTS'),
+                /*
+                 *这里主要增加默认的队列及队列映射的数组  
+                 */
+                'default_job' => '',
+                'job_mapping' => [],
             ],
         ],
     
