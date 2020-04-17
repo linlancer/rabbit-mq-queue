@@ -214,4 +214,9 @@ class RabbitMQJob extends Job implements JobContract
             throw $exception;
         }
     }
+
+    public function maxTries()
+    {
+        return $this->payload()['maxTries'] ?? $this->connection->getOption('max_tries') ?? null;
+    }
 }
