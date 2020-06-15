@@ -10,7 +10,6 @@ use Interop\Amqp\AmqpTopic;
 use Psr\Log\LoggerInterface;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpMessage;
-use Interop\Amqp\Impl\AmqpBind;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use LinLancer\Laravel\RabbitMQ\Queue\Jobs\RabbitMQJob;
 
@@ -18,31 +17,16 @@ class RabbitMQQueue extends Queue implements QueueContract
 {
     protected $sleepOnError;
 
-    protected $queueName;
-    protected $queueOptions;
-    protected $exchangeOptions;
-
-    protected $declaredExchanges = [];
-    protected $declaredQueues = [];
-
     /**
      * @var AmqpContext
      */
     protected $context;
+
     protected $correlationId;
 
-    public function __construct(AmqpContext $context, array $config)
+    public function __construct(AmqpContext $context, array $config = [])
     {
         $this->context = $context;
-
-        $this->queueName = $config['queue'] ?? $config['options']['queue']['name'];
-        $this->queueOptions = $config['options']['queue'];
-        $this->queueOptions['arguments'] = isset($this->queueOptions['arguments']) ?
-            json_decode($this->queueOptions['arguments'], true) : [];
-
-        $this->exchangeOptions = $config['options']['exchange'];
-        $this->exchangeOptions['arguments'] = isset($this->exchangeOptions['arguments']) ?
-            json_decode($this->exchangeOptions['arguments'], true) : [];
 
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
@@ -201,68 +185,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         return $this->context;
     }
 
-    /**
-     * @param string $queueName
-     *
-     * @return array [Interop\Amqp\AmqpQueue, Interop\Amqp\AmqpTopic]
-     */
-    protected function declareEverything(string $queueName = null): array
-    {
-        $queueName = $this->getQueueName($queueName);
-        $exchangeName = $this->exchangeOptions['name'] ?: $queueName;
-
-        $topic = $this->context->createTopic($exchangeName);
-        $topic->setType($this->exchangeOptions['type']);
-        $topic->setArguments($this->exchangeOptions['arguments']);
-        if ($this->exchangeOptions['passive']) {
-            $topic->addFlag(AmqpTopic::FLAG_PASSIVE);
-        }
-        if ($this->exchangeOptions['durable']) {
-            $topic->addFlag(AmqpTopic::FLAG_DURABLE);
-        }
-        if ($this->exchangeOptions['auto_delete']) {
-            $topic->addFlag(AmqpTopic::FLAG_AUTODELETE);
-        }
-
-        if ($this->exchangeOptions['declare'] && ! in_array($exchangeName, $this->declaredExchanges, true)) {
-            $this->context->declareTopic($topic);
-
-            $this->declaredExchanges[] = $exchangeName;
-        }
-
-        $queue = $this->context->createQueue($queueName);
-        $queue->setArguments($this->queueOptions['arguments']);
-        if ($this->queueOptions['passive']) {
-            $queue->addFlag(AmqpQueue::FLAG_PASSIVE);
-        }
-        if ($this->queueOptions['durable']) {
-            $queue->addFlag(AmqpQueue::FLAG_DURABLE);
-        }
-        if ($this->queueOptions['exclusive']) {
-            $queue->addFlag(AmqpQueue::FLAG_EXCLUSIVE);
-        }
-        if ($this->queueOptions['auto_delete']) {
-            $queue->addFlag(AmqpQueue::FLAG_AUTODELETE);
-        }
-
-        if ($this->queueOptions['declare'] && ! in_array($queueName, $this->declaredQueues, true)) {
-            $this->context->declareQueue($queue);
-
-            $this->declaredQueues[] = $queueName;
-        }
-
-        if ($this->queueOptions['bind']) {
-            $this->context->bind(new AmqpBind($queue, $topic, $queue->getQueueName()));
-        }
-
-        return [$queue, $topic];
-    }
-
-    protected function getQueueName($queueName = null)
-    {
-        return $queueName ?: $this->queueName;
-    }
-
     protected function createPayloadArray($job, $queue, $data = '')
     {
         return array_merge(parent::createPayloadArray($job, $queue, $data), [
@@ -299,10 +221,5 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
-    }
-
-    public function getOption($name)
-    {
-        return $this->queueOptions[$name] ?? null;
     }
 }
