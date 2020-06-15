@@ -1,10 +1,10 @@
 <?php
 
-namespace VladimirYuldashev\LaravelQueueRabbitMQ;
+namespace LinLancer\Laravel\RabbitMQ;
 
 use Illuminate\Queue\QueueManager;
 use Illuminate\Support\ServiceProvider;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
+use LinLancer\Laravel\RabbitMQ\Queue\Connectors\RabbitMQConnector;
 
 class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 {

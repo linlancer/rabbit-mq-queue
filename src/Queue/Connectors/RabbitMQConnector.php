@@ -1,23 +1,20 @@
 <?php
 
-namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
+namespace LinLancer\Laravel\RabbitMQ\Queue\Connectors;
 
 use Illuminate\Support\Arr;
 use Interop\Amqp\AmqpContext;
 use InvalidArgumentException;
 use Illuminate\Contracts\Queue\Queue;
-use Illuminate\Queue\Events\JobFailed;
 use Interop\Amqp\AmqpConnectionFactory;
 use Enqueue\AmqpTools\DelayStrategyAware;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Queue\Events\WorkerStopping;
 use Enqueue\AmqpTools\RabbitMqDlxDelayStrategy;
 use Illuminate\Queue\Connectors\ConnectorInterface;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use LinLancer\Laravel\RabbitMQ\Queue\RabbitMQQueue;
 use Interop\Amqp\AmqpConnectionFactory as InteropAmqpConnectionFactory;
 use Enqueue\AmqpLib\AmqpConnectionFactory as EnqueueAmqpConnectionFactory;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\Listeners\RabbitMQFailedEvent;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
 {
@@ -32,10 +29,7 @@ class RabbitMQConnector implements ConnectorInterface
     }
 
     /**
-     * Establish a queue connection.
-     *
      * @param array $config
-     *
      * @return Queue
      * @throws \ReflectionException
      */
@@ -47,7 +41,9 @@ class RabbitMQConnector implements ConnectorInterface
             throw new \LogicException(sprintf('The factory_class option has to be valid class that implements "%s"', InteropAmqpConnectionFactory::class));
         }
 
-        /** @var AmqpConnectionFactory $factory */
+        /**
+         * @var AmqpConnectionFactory $factory
+         */
         $factory = new $factoryClass([
             'dsn' => Arr::get($config, 'dsn'),
             'host' => Arr::get($config, 'host', '127.0.0.1'),
@@ -78,12 +74,6 @@ class RabbitMQConnector implements ConnectorInterface
 
         if ($worker === 'default') {
             return new RabbitMQQueue($context, $config);
-        }
-
-        if ($worker === 'horizon') {
-            $this->dispatcher->listen(JobFailed::class, RabbitMQFailedEvent::class);
-
-            return new HorizonRabbitMQQueue($context, $config);
         }
 
         $customWorker = new $worker($context, $config);

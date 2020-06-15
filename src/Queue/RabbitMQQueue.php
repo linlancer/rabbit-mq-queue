@@ -1,6 +1,6 @@
 <?php
 
-namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
+namespace LinLancer\Laravel\RabbitMQ\Queue;
 
 use RuntimeException;
 use Illuminate\Queue\Queue;
@@ -12,7 +12,7 @@ use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\Impl\AmqpBind;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use LinLancer\Laravel\RabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract
 {

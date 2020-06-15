@@ -29,12 +29,12 @@
   },
   "autoload": {
     "psr-4": {
-      "VladimirYuldashev\\LaravelQueueRabbitMQ\\": "src/"
+      "LinLancer\\Laravel\\RabbitMQ": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "VladimirYuldashev\\LaravelQueueRabbitMQ\\Tests\\": "tests/"
+      "LinLancer\\Laravel\\RabbitMQ\\Tests\\": "tests/"
     }
   },
   "extra": {
@@ -43,7 +43,7 @@
     },
     "laravel": {
       "providers": [
-        "VladimirYuldashev\\LaravelQueueRabbitMQ\\LaravelQueueRabbitMQServiceProvider"
+        "LinLancer\\Laravel\\RabbitMQ\\LaravelQueueRabbitMQServiceProvider"
       ]
     }
   },
